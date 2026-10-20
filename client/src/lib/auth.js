@@ -1,3 +1,5 @@
+import { jwtDecode } from 'jwt-decode';
+
 // All localStorage access lives here. Only call these from event handlers or useEffect
 // (never during render), otherwise Next.js server rendering will fail or cause hydration errors.
 const TOKEN_KEY = 'educore_token';
@@ -13,6 +15,7 @@ export function saveSession({ token, user }) {
   }
 }
 
+// Returns { token, user } only if a token exists, decodes, and has not expired. Otherwise null.
 export function getSession() {
   try {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -33,14 +36,13 @@ export function clearSession() {
   }
 }
 
-// Convenience only: reads the exp claim so an expired token is not treated as logged in.
-// This does NOT verify the signature. The server middleware is what actually enforces tokens.
+// Reads the exp claim so an expired or garbage token is rejected before any request is made.
+// This does NOT verify the signature. The server's protect middleware is what enforces tokens.
 function isTokenExpired(token) {
   try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(atob(base64));
-    return typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now();
+    const { exp } = jwtDecode(token);
+    return typeof exp !== 'number' || exp * 1000 <= Date.now();
   } catch {
-    return true; // malformed token
+    return true; // not a decodable JWT
   }
 }
