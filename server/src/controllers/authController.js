@@ -110,3 +110,11 @@ exports.login = async (req, res, next) => {
     return next(err);
   }
 };
+
+
+// GET /api/auth/me  (protected: req.user is set by the protect middleware)
+exports.getMe = (req, res) => {
+  return res.json({
+    user: { ...toUserResponse(req.user), createdAt: req.user.createdAt },
+  });
+};
