@@ -1,0 +1,43 @@
+// Reusable ownership guard for any resource that stores its owner's user id.
+//
+//   const ownsCourse = checkOwnership(Course, { label: 'course' });
+//   router.put('/:id', ownsCourse, updateCourse);
+//
+// Order of checks (this order matters):
+//   1. 404 if no document has this id
+//   2. 403 if the document exists but belongs to someone else
+// On success the loaded document is available as req.resource, so the controller does not
+// need to query it a second time.
+//
+// Requirements: run it AFTER `protect` (it needs req.user) and make sure the route's :id was
+// validated first (router.param + isValidObjectId), so a bad id never reaches Mongoose.
+exports.checkOwnership = (Model, { label = 'resource', ownerField = 'authorId' } = {}) => {
+  const Label = label.charAt(0).toUpperCase() + label.slice(1);
+
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Not authorized: no user on request', code: 'NO_USER' });
+      }
+
+      const doc = await Model.findById(req.params.id);
+      if (!doc) {
+        return res.status(404).json({ message: `${Label} not found` });
+      }
+
+      // Compare the stored owner against the id from the verified JWT, never against the request body
+      const ownerId = doc[ownerField];
+      if (!ownerId || ownerId.toString() !== req.user.id) {
+        return res.status(403).json({
+          message: `Not authorized to modify this ${label}`,
+          code: 'FORBIDDEN',
+        });
+      }
+
+      req.resource = doc;
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  };
+};
