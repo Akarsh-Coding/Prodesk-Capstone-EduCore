@@ -1,4 +1,5 @@
 const Course = require('../models/Course');
+const Enrollment = require('../models/Enrollment');
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0;
 
@@ -173,6 +174,8 @@ exports.updateCourse = async (req, res, next) => {
 exports.deleteCourse = async (req, res, next) => {
   try {
     await req.resource.deleteOne();
+    // No orphans: students' enrollments in this course are removed with it
+    await Enrollment.deleteMany({ courseId: req.resource._id });
     return res.json({ message: 'Course deleted', id: req.resource._id.toString() });
   } catch (err) {
     return next(err);
