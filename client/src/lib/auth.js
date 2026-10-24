@@ -27,6 +27,15 @@ export function getSession() {
   }
 }
 
+// Raw token (or null). Expiry is not checked here: if it is expired the server answers 401 and we log out.
+export function getToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function clearSession() {
   try {
     localStorage.removeItem(TOKEN_KEY);
