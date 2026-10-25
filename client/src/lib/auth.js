@@ -15,6 +15,16 @@ export function saveSession({ token, user }) {
   }
 }
 
+// Replaces the cached user (for example after the plan changes) without touching the token
+export function updateStoredUser(user) {
+  try {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Returns { token, user } only if a token exists, decodes, and has not expired. Otherwise null.
 export function getSession() {
   try {

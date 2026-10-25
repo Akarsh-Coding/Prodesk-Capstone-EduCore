@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useOptimisticRemove } from '@/hooks/useOptimisticRemove';
-import { enrollmentsApi } from '@/lib/services';
+import { enrollmentsApi, paymentsApi, isStripeCheckoutUrl } from '@/lib/services';
 import AuthGate from '@/components/AuthGate';
 import Nav from '@/components/Nav';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [listError, setListError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [pendingUnenroll, setPendingUnenroll] = useState(null); // the enrollment awaiting confirmation
+  const [upgrading, setUpgrading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState('');
 
   const {
     remove: removeEnrollment,
@@ -59,6 +61,33 @@ export default function DashboardPage() {
 
   const cancelUnenroll = useCallback(() => setPendingUnenroll(null), []);
 
+  // If the user comes back from Stripe with the browser's Back button, the page can be restored
+  // from the cache with the button still disabled. Reset it.
+  useEffect(() => {
+    const onPageShow = (event) => {
+      if (event.persisted) setUpgrading(false);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  // UPGRADE: ask the server for a Checkout Session, then leave the app for Stripe's hosted page
+  const handleUpgrade = async () => {
+    if (upgrading) return;
+    setUpgrading(true);
+    setUpgradeError('');
+    try {
+      const data = await paymentsApi.createCheckoutSession();
+      if (!isStripeCheckoutUrl(data.url)) {
+        throw new Error('The server did not return a valid checkout link.');
+      }
+      window.location.href = data.url; // the button stays disabled while the browser navigates away
+    } catch (err) {
+      setUpgradeError(err.message);
+      setUpgrading(false);
+    }
+  };
+
   // UNENROLL: the dialog closes and the enrollment leaves the list at once;
   // the DELETE runs in the background (rolled back if it fails)
   const confirmUnenroll = () => {
@@ -88,6 +117,31 @@ export default function DashboardPage() {
               </Link>
             )}
           </div>
+
+          <section className="mt-8 rounded border p-4">
+            <h2 className="text-lg font-semibold mb-1">Your plan</h2>
+            {(user.plan || 'free') === 'pro' ? (
+              <p>
+                EduCore Pro is active on your account. <strong className="rounded border px-1">PRO</strong>
+              </p>
+            ) : (
+              <>
+                <p className="mb-3">You are on the Free plan. Upgrade to EduCore Pro with a one-time payment.</p>
+                <button
+                  onClick={handleUpgrade}
+                  disabled={upgrading}
+                  className="border px-4 py-2 rounded disabled:opacity-50"
+                >
+                  {upgrading ? 'Redirecting to Stripe...' : 'Upgrade to Pro'}
+                </button>
+                {upgradeError && (
+                  <p role="alert" className="mt-2 text-red-600">
+                    {upgradeError}
+                  </p>
+                )}
+              </>
+            )}
+          </section>
 
           <section className="mt-10">
             <h2 className="text-lg font-semibold mb-3">My enrollments</h2>

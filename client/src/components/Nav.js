@@ -18,6 +18,7 @@ export default function Nav({ user, onLogout }) {
       )}
       <span className="ml-auto text-sm">
         {user.name} ({user.role})
+        {user.plan === 'pro' && <strong className="ml-2 rounded border px-1">PRO</strong>}
       </span>
       <button onClick={onLogout} className="border px-3 py-1 rounded">
         Log out

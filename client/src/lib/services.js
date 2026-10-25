@@ -48,3 +48,24 @@ export const enrollmentsApi = {
     return api.delete(`/api/enrollments/${enrollmentId}`);
   },
 };
+
+export const paymentsApi = {
+  // Asks the server to create a Stripe Checkout Session. Returns { url }: the hosted payment page.
+  // The secret key stays on the server; the browser only ever gets this URL.
+  createCheckoutSession: () => api.post('/api/payments/create-checkout-session'),
+  // Called by /payment/success. The server asks Stripe whether the session was really paid.
+  verify: async (sessionId) => {
+    requireId('checkout session', sessionId);
+    return api.get(`/api/payments/verify?session_id=${encodeURIComponent(sessionId)}`);
+  },
+};
+
+// Only follow a checkout link that is an https URL on stripe.com (never an arbitrary address)
+export function isStripeCheckoutUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && (url.hostname === 'stripe.com' || url.hostname.endsWith('.stripe.com'));
+  } catch {
+    return false;
+  }
+}
