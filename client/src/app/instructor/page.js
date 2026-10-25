@@ -3,11 +3,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useOptimisticRemove } from '@/hooks/useOptimisticRemove';
 import { coursesApi } from '@/lib/services';
 import AuthGate from '@/components/AuthGate';
 import Nav from '@/components/Nav';
 import Modal from '@/components/Modal';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import CourseForm, { courseToFormValues } from '@/components/CourseForm';
+
+const courseLabel = (course) => course.title;
 
 export default function InstructorPage() {
   const auth = useRequireAuth();
@@ -18,6 +22,13 @@ export default function InstructorPage() {
   const [listError, setListError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [editing, setEditing] = useState(null); // the course being edited, or null
+  const [pendingDelete, setPendingDelete] = useState(null); // the course awaiting confirmation, or null
+
+  const {
+    remove: removeCourse,
+    error: deleteError,
+    clearError: clearDeleteError,
+  } = useOptimisticRemove(courses, setCourses, { action: 'delete', getLabel: courseLabel });
 
   // READ: load "my courses" once the session is confirmed
   useEffect(() => {
@@ -65,6 +76,16 @@ export default function InstructorPage() {
   };
 
   const closeEditor = useCallback(() => setEditing(null), []);
+  const cancelDelete = useCallback(() => setPendingDelete(null), []);
+
+  // DELETE: the confirm dialog closes at once, the course leaves the list at once,
+  // and the request runs in the background (rolled back if it fails)
+  const confirmDelete = () => {
+    const course = pendingDelete;
+    setPendingDelete(null);
+    if (!course) return;
+    removeCourse(course._id, () => coursesApi.remove(course._id));
+  };
 
   return (
     <AuthGate auth={auth}>
@@ -97,6 +118,15 @@ export default function InstructorPage() {
               <section>
                 <h2 className="text-lg font-semibold mb-3">Your courses</h2>
 
+                {deleteError && (
+                  <div role="alert" className="mb-3 flex items-start justify-between gap-4 rounded border border-red-600 p-3 text-red-600">
+                    <span>{deleteError}</span>
+                    <button onClick={clearDeleteError} className="underline">
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
                 {listStatus === 'loading' && <p>Loading your courses...</p>}
 
                 {listStatus === 'error' && (
@@ -125,9 +155,17 @@ export default function InstructorPage() {
                           </p>
                           <p className="mt-1">{course.description}</p>
                         </div>
-                        <button onClick={() => setEditing(course)} className="h-fit border px-3 py-1 rounded">
-                          Edit
-                        </button>
+                        <div className="flex h-fit gap-2">
+                          <button onClick={() => setEditing(course)} className="border px-3 py-1 rounded">
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setPendingDelete(course)}
+                            className="rounded border border-red-600 px-3 py-1 text-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -145,6 +183,16 @@ export default function InstructorPage() {
                     onCancel={closeEditor}
                   />
                 </Modal>
+              )}
+
+              {pendingDelete && (
+                <ConfirmDialog
+                  title="Delete course?"
+                  message={`"${pendingDelete.title}" and any student enrollments in it will be permanently deleted. This cannot be undone.`}
+                  confirmLabel="Delete course"
+                  onConfirm={confirmDelete}
+                  onCancel={cancelDelete}
+                />
               )}
             </>
           )}

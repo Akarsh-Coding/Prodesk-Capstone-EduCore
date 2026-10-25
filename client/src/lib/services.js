@@ -30,6 +30,10 @@ export const coursesApi = {
     requireId('course', id);
     return api.put(`/api/courses/${id}`, pickCourseFields(values));
   },
+  remove: async (id) => {
+    requireId('course', id);
+    return api.delete(`/api/courses/${id}`);
+  },
 };
 
 export const enrollmentsApi = {
@@ -37,5 +41,10 @@ export const enrollmentsApi = {
   enroll: async (courseId) => {
     requireId('course', courseId);
     return api.post('/api/enrollments', { courseId });
+  },
+  // Unenroll. Note: this takes the ENROLLMENT id, not the course id.
+  remove: async (enrollmentId) => {
+    requireId('enrollment', enrollmentId);
+    return api.delete(`/api/enrollments/${enrollmentId}`);
   },
 };
