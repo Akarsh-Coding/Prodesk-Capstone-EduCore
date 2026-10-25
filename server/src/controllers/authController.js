@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { toUserResponse } = require('../utils/userResponse');
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 const ROLES = ['student', 'instructor'];
@@ -15,14 +16,6 @@ const signToken = (user) =>
   jwt.sign({ id: user._id.toString(), role: user.role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
-
-// Explicit allow-list of fields: the password hash can never end up in a response
-const toUserResponse = (user) => ({
-  id: user._id.toString(),
-  name: user.name,
-  email: user.email,
-  role: user.role,
-});
 
 // POST /api/auth/register
 exports.register = async (req, res, next) => {
@@ -110,7 +103,6 @@ exports.login = async (req, res, next) => {
     return next(err);
   }
 };
-
 
 // GET /api/auth/me  (protected: req.user is set by the protect middleware)
 exports.getMe = (req, res) => {

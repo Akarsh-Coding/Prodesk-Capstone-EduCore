@@ -34,6 +34,16 @@ const userSchema = new mongoose.Schema(
       },
       default: 'student',
     },
+    // Set to 'pro' ONLY by the payment verification route, after Stripe confirms a paid session.
+    // register/login never read it from the request body.
+    plan: {
+      type: String,
+      enum: {
+        values: ['free', 'pro'],
+        message: '{VALUE} is not a valid plan',
+      },
+      default: 'free',
+    },
   },
   {
     timestamps: true,
