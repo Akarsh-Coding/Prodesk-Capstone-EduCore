@@ -6,16 +6,21 @@ const courseRoutes = require('./routes/courseRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
-
 const app = express();
 
-// CLIENT_URL can hold one origin or several, comma-separated
-// e.g. http://localhost:3000,https://educore.vercel.app
+// Browser origins allowed to call this API:
+//   CLIENT_URL   one origin or several, comma-separated (e.g. http://localhost:3000,https://educore.vercel.app)
+//   FRONTEND_URL the deployed site (also used for the Stripe redirects), so setting it is enough on its own
 // Trailing slashes are stripped because browsers send origins without one.
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
-  .split(',')
-  .map((origin) => origin.trim().replace(/\/+$/, ''))
-  .filter(Boolean);
+const configuredOrigins = [process.env.CLIENT_URL, process.env.FRONTEND_URL].filter(Boolean).join(',');
+const allowedOrigins = [
+  ...new Set(
+    (configuredOrigins || 'http://localhost:3000')
+      .split(',')
+      .map((origin) => origin.trim().replace(/\/+$/, ''))
+      .filter(Boolean)
+  ),
+];
 
 app.locals.allowedOrigins = allowedOrigins;
 
@@ -34,13 +39,9 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-
 app.use('/api/courses', courseRoutes);
-
 app.use('/api/enrollments', enrollmentRoutes);
-
 app.use('/api/payments', paymentRoutes);
-
 
 // Unknown routes
 app.use((req, res) => {
