@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -43,18 +44,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Unknown routes
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
-// Central error handler (the 4-argument signature is required by Express)
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  console.error(err);
-  res.status(status).json({
-    message: status === 500 ? 'Internal server error' : err.message,
-  });
-});
+// Unknown routes, then the global error handler. Both must stay LAST, after every route.
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;

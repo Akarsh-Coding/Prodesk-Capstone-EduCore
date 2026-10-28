@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+const { ApiError } = require('../utils/ApiError');
 
 // Used with router.param('id', objectIdParam('course')): Express runs it for EVERY route that has
-// an :id segment, so a bad value ("undefined", "123", ...) can never reach Mongoose and cause
-// a "Cast to ObjectId failed" error. New :id routes added later are covered automatically.
+// an :id segment, so a bad value ("undefined", "123", ...) is rejected with a 400 before it can
+// reach Mongoose. (If one ever slipped through, the central handler maps CastError to 400 as well.)
 exports.objectIdParam = (label = 'resource') => (req, res, next, id) => {
   if (!mongoose.isValidObjectId(id)) {
-    return res.status(400).json({ message: `Invalid ${label} ID`, code: 'INVALID_ID' });
+    return next(ApiError.badRequest(`Invalid ${label} ID`, { code: 'INVALID_ID' }));
   }
   return next();
 };

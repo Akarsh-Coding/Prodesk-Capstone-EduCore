@@ -1,7 +1,12 @@
 const Stripe = require('stripe');
+const { ApiError } = require('../utils/ApiError');
 
-// A configuration problem (missing or unsafe key), as opposed to a Stripe API error
-const configError = (message) => Object.assign(new Error(message), { isConfigError: true });
+// A configuration problem (missing or unsafe key). The real reason goes to the server log;
+// the client only gets a generic 503, so nothing about our setup leaks.
+const configError = (message) => {
+  console.error('[payments] configuration problem:', message);
+  return new ApiError(503, 'Payments are not available right now', { code: 'PAYMENTS_NOT_CONFIGURED' });
+};
 
 let client = null;
 let clientKey = null;
