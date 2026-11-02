@@ -11,6 +11,8 @@ const Course = require('../models/Course');
 const { protect } = require('../middleware/authMiddleware');
 const { validateObjectIdParam } = require('../middleware/validateObjectId');
 const { checkOwnership } = require('../middleware/ownership');
+const { validate } = require('../middleware/validate');
+const { createCourseSchema, updateCourseSchema } = require('../validation/schemas');
 
 const router = express.Router();
 
@@ -23,11 +25,11 @@ router.param('id', validateObjectIdParam);
 // Loads the course, 404 if missing, 403 if the logged-in user is not its author
 const ownsCourse = checkOwnership(Course, { label: 'course' });
 
-router.post('/', createCourse);
+router.post('/', validate(createCourseSchema), createCourse);
 router.get('/', getCourses);
 router.get('/mine', getMyCourses); // must stay ABOVE /:id, or "mine" would be treated as an id
 router.get('/:id', getCourseById);
-router.put('/:id', ownsCourse, updateCourse);
+router.put('/:id', ownsCourse, validate(updateCourseSchema), updateCourse);
 router.delete('/:id', ownsCourse, deleteCourse);
 
 module.exports = router;

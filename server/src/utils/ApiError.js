@@ -2,14 +2,14 @@
 //   { success: false, message, errors?, code? }
 //
 //   throw ApiError.notFound('Course not found');
-//   throw ApiError.validation({ title: 'Title is required' });
+//   throw ApiError.validation([{ field: 'title', message: 'Title is required' }]);
 //   throw new ApiError(402, 'Payment has not been completed', { code: 'NOT_PAID', meta: { paymentStatus } });
 class ApiError extends Error {
   constructor(statusCode, message, { errors, code, meta } = {}) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
-    this.errors = errors; // per-field messages, for 400 validation failures
+    this.errors = errors; // [{ field, message }], for 400 validation failures
     this.code = code; // stable machine-readable code the client can switch on (for example INVALID_ID)
     this.meta = meta; // extra fields to include in the response body
   }
@@ -18,8 +18,12 @@ class ApiError extends Error {
     return new ApiError(400, message, options);
   }
 
+  // Accepts [{ field, message }] or a { field: message } map, and always stores the array form
   static validation(errors) {
-    return new ApiError(400, 'Validation failed', { errors });
+    const list = Array.isArray(errors)
+      ? errors
+      : Object.entries(errors || {}).map(([field, message]) => ({ field, message }));
+    return new ApiError(400, 'Validation failed', { errors: list });
   }
 
   static unauthorized(message = 'Not authorized', options) {

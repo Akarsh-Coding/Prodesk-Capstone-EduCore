@@ -9,6 +9,8 @@ const Enrollment = require('../models/Enrollment');
 const { protect } = require('../middleware/authMiddleware');
 const { objectIdParam } = require('../middleware/validateObjectId');
 const { checkOwnership } = require('../middleware/ownership');
+const { validate } = require('../middleware/validate');
+const { createEnrollmentSchema, progressUpdateSchema } = require('../validation/schemas');
 
 const router = express.Router();
 
@@ -21,9 +23,9 @@ router.param('id', objectIdParam('enrollment'));
 // Loads the enrollment, 404 if missing, 403 if its userId is not the logged-in user
 const ownsEnrollment = checkOwnership(Enrollment, { label: 'enrollment', ownerField: 'userId' });
 
-router.post('/', enroll);
+router.post('/', validate(createEnrollmentSchema), enroll);
 router.get('/mine', getMyEnrollments);
-router.patch('/:id/progress', ownsEnrollment, addProgress);
+router.patch('/:id/progress', ownsEnrollment, validate(progressUpdateSchema), addProgress);
 router.delete('/:id', ownsEnrollment, deleteEnrollment);
 
 module.exports = router;

@@ -1,11 +1,7 @@
-const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { ApiError } = require('../utils/ApiError');
-
-// Strings only: stops objects like { "$gt": "" } and numbers from reaching a query
-const isId = (value) => typeof value === 'string' && mongoose.isValidObjectId(value);
 
 // Course details (plus the author's name) attached to every enrollment we return
 const COURSE_POPULATE = {
@@ -15,11 +11,10 @@ const COURSE_POPULATE = {
 };
 
 // POST /api/enrollments   body: { courseId }
+// validate(createEnrollmentSchema) guarantees courseId is a 24-character hex string, so it can never
+// be an object like { "$gt": "" } and never causes a CastError. Any other key (userId...) was removed.
 exports.enroll = asyncHandler(async (req, res) => {
-  const { courseId } = req.body || {};
-  if (!isId(courseId)) {
-    throw ApiError.badRequest('A valid courseId is required', { code: 'INVALID_ID' });
-  }
+  const { courseId } = req.body;
 
   // Only published courses can be joined. Drafts look the same as missing courses (404).
   const course = await Course.findById(courseId);
@@ -48,10 +43,7 @@ exports.getMyEnrollments = asyncHandler(async (req, res) => {
 // Runs after protect, router.param (id format) and checkOwnership (404, then 403).
 // PATCH changes only what was sent: here, one lesson id added to completedLessons.
 exports.addProgress = asyncHandler(async (req, res) => {
-  const { lessonId } = req.body || {};
-  if (!isId(lessonId)) {
-    throw ApiError.badRequest('A valid lessonId is required', { code: 'INVALID_ID' });
-  }
+  const { lessonId } = req.body; // validated by validate(progressUpdateSchema): a 24-character hex string
 
   // $addToSet adds the id only if it is not already there, so repeating a request is safe.
   // TODO (when the Lesson model exists): confirm the lesson belongs to enrollment.courseId.

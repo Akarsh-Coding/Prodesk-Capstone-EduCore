@@ -33,11 +33,12 @@ function normalizeError(err) {
 
   // 3. Mongoose: schema validation failed. Return the per-field messages.
   if (err.name === 'ValidationError' && err.errors) {
-    const errors = {};
-    for (const [field, fieldError] of Object.entries(err.errors)) {
-      // A nested cast error's own message echoes the bad value and type names, so keep it generic
-      errors[field] = fieldError.name === 'CastError' ? 'Invalid value' : fieldError.message;
-    }
+    // Same [{ field, message }] format as the Zod validate() middleware. A nested cast error's own
+    // message echoes the bad value and type names, so that one is kept generic.
+    const errors = Object.entries(err.errors).map(([field, fieldError]) => ({
+      field,
+      message: fieldError.name === 'CastError' ? 'Invalid value' : fieldError.message,
+    }));
     return { status: 400, message: 'Validation failed', errors };
   }
 

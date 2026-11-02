@@ -16,6 +16,20 @@ function handleUnauthorized() {
   return new Promise(() => {});
 }
 
+// The server reports validation problems as [{ field, message }]. The forms read a { field: message }
+// map (fieldErrors.title), so convert. The first message for each field wins. A plain object is
+// passed through, in case an older server answers in the map format.
+function toFieldErrors(errors) {
+  if (Array.isArray(errors)) {
+    const map = {};
+    for (const item of errors) {
+      if (item && item.field && !(item.field in map)) map[item.field] = item.message;
+    }
+    return map;
+  }
+  return errors && typeof errors === 'object' ? errors : {};
+}
+
 async function request(method, path, { body, token, auth = false } = {}) {
   if (!API_URL) {
     throw new Error('NEXT_PUBLIC_API_URL is not set. Add it to client/.env.local and restart the dev server.');
@@ -59,7 +73,7 @@ async function request(method, path, { body, token, auth = false } = {}) {
     const error = new Error(data.message || `Request failed (${res.status})`);
     error.status = res.status;
     error.code = data.code; // for example INVALID_ID or FORBIDDEN
-    error.fieldErrors = data.errors || {};
+    error.fieldErrors = toFieldErrors(data.errors);
     throw error;
   }
 
