@@ -1,0 +1,348 @@
+{
+  "info": {
+    "name": "EduCore: Rate Limit QA (429 Too Many Requests)",
+    "description": "Proves the rate limiters work. Run it with the COLLECTION RUNNER and several ITERATIONS: every iteration sends requests A to E once, and the tests know which iteration they are in, so they expect 'allowed' before the limit and 429 after it.\n\nBEFORE YOU RUN\n1. Set the collection variables loginLimit and aiLimit to the values your server uses (defaults 20 and 5; they must match RATE_LIMIT_AUTH_MAX and RATE_LIMIT_AI_MAX in server/.env).\n2. Restart the server (the counters live in memory), or wait for the window (15 minutes by default). Running twice in a row will show 429 from the first iteration.\n3. In the Runner, set Iterations to the LARGER of the two limits plus 3 (defaults: 23; demo values 3 and 2: 6). Delay 0. Click Run.\n\nWHAT YOU SHOULD SEE\n- C (AI): 404 for the first aiLimit iterations, then 429.\n- B (wrong password): 401 for the first loginLimit iterations, then 429.\n- A (correct password): 200 until B has locked the IP out, then 429 as well.\n- D (/api/auth/me) and E (/api/health): 200 on every iteration, no rate-limit headers.\nOpen any 429 response and look at its Headers tab: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset and Retry-After.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "loginLimit",
+      "value": "20",
+      "type": "string"
+    },
+    {
+      "key": "aiLimit",
+      "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "missingId",
+      "value": "64b000000000000000000000",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Throttle test: run this collection with several iterations",
+      "item": [
+        {
+          "name": "A. Login with the CORRECT password (successful logins are never counted)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// First iteration only: create a throwaway user (this uses ONE registration from the register limit)",
+                  "if (pm.info.iteration === 0) {",
+                  "  const email = 'ratelimit.' + Date.now() + '@example.com';",
+                  "  const password = 'Passw0rd!123';",
+                  "  pm.collectionVariables.set('email', email);",
+                  "  pm.collectionVariables.set('password', password);",
+                  "  pm.collectionVariables.set('token', '');",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get('baseUrl') + '/api/auth/register',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json' },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ name: 'RateLimit QA', email: email, password: password, role: 'instructor' }) },",
+                  "  }, (err, res) => { if (!err && res.code === 201) pm.collectionVariables.set('token', res.json().token); });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const i = pm.info.iteration;",
+                  "const limit = Number(pm.variables.get('loginLimit'));",
+                  "pm.test(\"Setup worked: the test user exists and has a token\", () => pm.expect(pm.collectionVariables.get(\"token\")).to.be.a(\"string\").and.not.empty);",
+                  "if (i < limit) {",
+                  "  pm.test(\"Iteration \" + i + \": correct password -> 200 (only FAILED logins use up the budget)\", () => pm.response.to.have.status(200));",
+                  "} else {",
+                  "  pm.test(\"Iteration \" + i + \": the IP is locked out by earlier failures, so even the correct password gets 429\", () => pm.response.to.have.status(429));",
+                  "  pm.test(\"429 body is exactly { success: false, message: \\\"Too many requests, please try again later\\\" }\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(Object.keys(j).sort()).to.eql([\"message\", \"success\"]);",
+                  "    pm.expect(j.success).to.eql(false);",
+                  "    pm.expect(j.message).to.eql(\"Too many requests, please try again later\");",
+                  "  });",
+                  "  pm.test(\"RateLimit-Limit header equals the configured limit\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Limit\"))).to.eql(limit));",
+                  "  pm.test(\"RateLimit-Remaining is 0\", () => pm.expect(pm.response.headers.get(\"RateLimit-Remaining\")).to.eql(\"0\"));",
+                  "  pm.test(\"Retry-After is a positive number of seconds\", () => pm.expect(Number(pm.response.headers.get(\"Retry-After\"))).to.be.above(0));",
+                  "  pm.test(\"No legacy X-RateLimit-* headers\", () => pm.expect(pm.response.headers.has(\"X-RateLimit-Limit\")).to.eql(false));",
+                  "  pm.test(\"The body is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Succeeds on every iteration until the IP has been locked out by failed attempts (request B). Then even the correct password is refused: that is the lockout.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "B. Login with a WRONG password (each one counts)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const i = pm.info.iteration;",
+                  "const limit = Number(pm.variables.get('loginLimit'));",
+                  "if (i < limit) {",
+                  "  pm.test(\"Iteration \" + i + \": inside the limit, so NOT 429 (expected 401)\", () => pm.response.to.have.status(401));",
+                  "  pm.test(\"RateLimit-Limit is the configured limit\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Limit\"))).to.eql(limit));",
+                  "  pm.test(\"RateLimit-Remaining counts down: \" + (limit - (i + 1)) + \" left\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Remaining\"))).to.eql(limit - (i + 1)));",
+                  "} else {",
+                  "  pm.test(\"Iteration \" + i + \": more than \" + limit + \" failed logins -> 429\", () => pm.response.to.have.status(429));",
+                  "  pm.test(\"429 body is exactly { success: false, message: \\\"Too many requests, please try again later\\\" }\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(Object.keys(j).sort()).to.eql([\"message\", \"success\"]);",
+                  "    pm.expect(j.success).to.eql(false);",
+                  "    pm.expect(j.message).to.eql(\"Too many requests, please try again later\");",
+                  "  });",
+                  "  pm.test(\"RateLimit-Limit header equals the configured limit\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Limit\"))).to.eql(limit));",
+                  "  pm.test(\"RateLimit-Remaining is 0\", () => pm.expect(pm.response.headers.get(\"RateLimit-Remaining\")).to.eql(\"0\"));",
+                  "  pm.test(\"Retry-After is a positive number of seconds\", () => pm.expect(Number(pm.response.headers.get(\"Retry-After\"))).to.be.above(0));",
+                  "  pm.test(\"No legacy X-RateLimit-* headers\", () => pm.expect(pm.response.headers.has(\"X-RateLimit-Limit\")).to.eql(false));",
+                  "  pm.test(\"The body is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "The first N attempts get 401 and the RateLimit-Remaining header counts down. Attempt N+1 gets 429.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "C. AI quiz request (strictest limit, per USER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const i = pm.info.iteration;",
+                  "const limit = Number(pm.variables.get('aiLimit'));",
+                  "if (i < limit) {",
+                  "  pm.test(\"Iteration \" + i + \": inside the limit, so NOT 429 (expected 404)\", () => pm.response.to.have.status(404));",
+                  "  pm.test(\"RateLimit-Limit is the configured limit\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Limit\"))).to.eql(limit));",
+                  "  pm.test(\"RateLimit-Remaining counts down: \" + (limit - (i + 1)) + \" left\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Remaining\"))).to.eql(limit - (i + 1)));",
+                  "} else {",
+                  "  pm.test(\"Iteration \" + i + \": more than \" + limit + \" AI requests -> 429\", () => pm.response.to.have.status(429));",
+                  "  pm.test(\"429 body is exactly { success: false, message: \\\"Too many requests, please try again later\\\" }\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(Object.keys(j).sort()).to.eql([\"message\", \"success\"]);",
+                  "    pm.expect(j.success).to.eql(false);",
+                  "    pm.expect(j.message).to.eql(\"Too many requests, please try again later\");",
+                  "  });",
+                  "  pm.test(\"RateLimit-Limit header equals the configured limit\", () => pm.expect(Number(pm.response.headers.get(\"RateLimit-Limit\"))).to.eql(limit));",
+                  "  pm.test(\"RateLimit-Remaining is 0\", () => pm.expect(pm.response.headers.get(\"RateLimit-Remaining\")).to.eql(\"0\"));",
+                  "  pm.test(\"Retry-After is a positive number of seconds\", () => pm.expect(Number(pm.response.headers.get(\"Retry-After\"))).to.be.above(0));",
+                  "  pm.test(\"No legacy X-RateLimit-* headers\", () => pm.expect(pm.response.headers.has(\"X-RateLimit-Limit\")).to.eql(false));",
+                  "  pm.test(\"The body is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/suggest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "suggest"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Uses a course id that does not exist, so no AI call is ever made and no money is spent: the limiter counts the request, then the route answers 404. Request N+1 gets 429.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{missingId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "D. GET /api/auth/me (never limited: the route guard calls it on every page)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200 on every iteration\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"No RateLimit headers: this endpoint is not throttled\", () => pm.expect(pm.response.headers.has(\"RateLimit-Limit\")).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "E. GET /api/health (never limited)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200 on every iteration\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

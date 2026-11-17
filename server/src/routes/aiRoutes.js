@@ -5,11 +5,16 @@ const { protect } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
 const { checkOwnership } = require('../middleware/ownership');
 const { suggestQuizSchema } = require('../validation/schemas');
+const { aiLimiter } = require('../middleware/rateLimiters');
 
 const router = express.Router();
 
 // Every route here needs a logged-in user
 router.use(protect);
+
+// The strict AI limit, keyed by user. It sits after protect (so req.user exists) and before everything
+// else, so a user over the limit is stopped before any validation, database read or AI call.
+router.use(aiLimiter);
 
 // The course id arrives in the BODY (not the URL), so the ownership check reads it from there.
 // This runs after validate(), which guarantees courseId is a 24-character hex string.
