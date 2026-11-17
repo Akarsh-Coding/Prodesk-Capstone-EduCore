@@ -1,0 +1,427 @@
+{
+  "generatedAt": "2026-11-17T15:34:09.285Z",
+  "modelsApi": "https://generativelanguage.googleapis.com/v1beta/models",
+  "pricing": {
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "checkedOn": "2026-11-17",
+    "tier": "Standard paid tier, USD per 1M tokens",
+    "note": "Costs are estimates. Rates are only applied for exact model IDs listed in the script pricing table; no price is inferred for other models. Actual charges depend on account tier, discounts, cached-token billing, and pricing changes. The API catalog also returned non-Gemini generation endpoints during the initial run; their test results are excluded from this Gemini comparison. Results for Gemini models in special-purpose families (including Omni/video generation) and non-Gemini catalog entries were excluded from the comparison."
+  },
+  "prompt": {
+    "courseTitle": "Introduction to the Scientific Method",
+    "outputRequirements": "Exactly 5 MCQs; exactly 4 options per question; correctIndex 0-3; non-empty explanations.",
+    "samePromptAndGenerationConfigForEveryTestedModel": true
+  },
+  "counts": {
+    "discovered": 64,
+    "eligible": 19,
+    "tested": 19,
+    "successful": 4,
+    "failed": 15,
+    "nonGeminiCatalogModelsAlsoTested": 8,
+    "excludedSpecialPurposeGeminiModelsAlsoTested": 3
+  },
+  "winners": {
+    "lowestTokenConsumption": "gemini-flash-lite-latest",
+    "lowestEstimatedCost": "gemini-3.1-flash-lite",
+    "fastest": "gemini-3.1-flash-lite-preview",
+    "bestOverall": "gemini-3.1-flash-lite",
+    "bestOverallMethod": "Among structurally valid quiz outputs with verified standard-tier pricing: rank-based score weighted 40% estimated cost, 35% response time, and 25% total tokens. Lower is better."
+  },
+  "recommendedConfiguration": "GEMINI_MODEL=gemini-3.1-flash-lite",
+  "results": [
+    {
+      "model": "gemini-2.5-flash",
+      "resourceName": "models/gemini-2.5-flash",
+      "displayName": "Gemini 2.5 Flash",
+      "description": "Stable version of Gemini 2.5 Flash, our mid-size multimodal model that supports up to 1 million tokens, released in June of 2025.",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-started).",
+      "httpStatus": 404,
+      "responseTimeMs": 462,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-2.5-flash-lite",
+      "resourceName": "models/gemini-2.5-flash-lite",
+      "displayName": "Gemini 2.5 Flash-Lite",
+      "description": "Stable version of Gemini 2.5 Flash-Lite, released in July of 2025",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model models/gemini-2.5-flash-lite is no longer available to new users. Please update your code to use models/gemini-3.5-flash-lite for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-started).",
+      "httpStatus": 404,
+      "responseTimeMs": 326,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-2.5-pro",
+      "resourceName": "models/gemini-2.5-pro",
+      "displayName": "Gemini 2.5 Pro",
+      "description": "Stable release (June 17th, 2025) of Gemini 2.5 Pro",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-started).",
+      "httpStatus": 404,
+      "responseTimeMs": 499,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-3-flash-preview",
+      "resourceName": "models/gemini-3-flash-preview",
+      "displayName": "Gemini 3 Flash Preview",
+      "description": "Gemini 3 Flash Preview",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "success",
+      "error": null,
+      "httpStatus": null,
+      "responseTimeMs": 6106,
+      "finishReason": "STOP",
+      "usage": {
+        "inputTokens": 219,
+        "outputTokens": 514,
+        "totalTokens": 1398,
+        "thinkingTokens": 665,
+        "cachedTokens": null
+      },
+      "quality": {
+        "valid": true,
+        "reason": null
+      },
+      "estimatedCostUsd": 0.0036465,
+      "pricingKnown": true,
+      "pricingBasis": "Google Standard paid tier; USD per 1M tokens (input 0.5, output 3, cached input 0.05)"
+    },
+    {
+      "model": "gemini-3.1-flash-lite",
+      "resourceName": "models/gemini-3.1-flash-lite",
+      "displayName": "Gemini 3.1 Flash Lite",
+      "description": "Gemini 3.1 Flash Lite",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "success",
+      "error": null,
+      "httpStatus": null,
+      "responseTimeMs": 11904,
+      "finishReason": "STOP",
+      "usage": {
+        "inputTokens": 219,
+        "outputTokens": 510,
+        "totalTokens": 729,
+        "thinkingTokens": null,
+        "cachedTokens": null
+      },
+      "quality": {
+        "valid": true,
+        "reason": null
+      },
+      "estimatedCostUsd": 0.00081975,
+      "pricingKnown": true,
+      "pricingBasis": "Google Standard paid tier; USD per 1M tokens (input 0.25, output 1.5, cached input 0.025)"
+    },
+    {
+      "model": "gemini-3.1-flash-lite-preview",
+      "resourceName": "models/gemini-3.1-flash-lite-preview",
+      "displayName": "Gemini 3.1 Flash Lite Preview",
+      "description": "Gemini 3.1 Flash Lite Preview",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "success",
+      "error": null,
+      "httpStatus": null,
+      "responseTimeMs": 5989,
+      "finishReason": "STOP",
+      "usage": {
+        "inputTokens": 219,
+        "outputTokens": 524,
+        "totalTokens": 743,
+        "thinkingTokens": null,
+        "cachedTokens": null
+      },
+      "quality": {
+        "valid": true,
+        "reason": null
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false,
+      "pricingBasis": "unavailable"
+    },
+    {
+      "model": "gemini-3.1-pro-preview",
+      "resourceName": "models/gemini-3.1-pro-preview",
+      "displayName": "Gemini 3.1 Pro Preview",
+      "description": "Gemini 3.1 Pro Preview",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h32m17.517638422s.",
+      "httpStatus": 429,
+      "responseTimeMs": 4857,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-3.1-pro-preview-customtools",
+      "resourceName": "models/gemini-3.1-pro-preview-customtools",
+      "displayName": "Gemini 3.1 Pro Preview Custom Tools",
+      "description": "Gemini 3.1 Pro Preview optimized for custom tool usage",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h32m12.987066342s.",
+      "httpStatus": 429,
+      "responseTimeMs": 4039,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-3.5-flash",
+      "resourceName": "models/gemini-3.5-flash",
+      "displayName": "Gemini 3.5 Flash",
+      "description": "Gemini 3.5 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 132230,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false
+    },
+    {
+      "model": "gemini-3.5-flash-lite",
+      "resourceName": "models/gemini-3.5-flash-lite",
+      "displayName": "Gemini 3.5 Flash Lite",
+      "description": "Gemini 3.5 Flash Lite",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 26276,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-3.6-flash",
+      "resourceName": "models/gemini-3.6-flash",
+      "displayName": "Gemini 3.6 Flash",
+      "description": "Gemini 3.6 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 61277,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "resourceName": "models/gemini-3.7-flash",
+      "displayName": "Gemini 3.7 Flash",
+      "description": "Gemini 3.7 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 13367,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false
+    },
+    {
+      "model": "gemini-3.8-flash",
+      "resourceName": "models/gemini-3.8-flash",
+      "displayName": "Gemini 3.8 Flash",
+      "description": "Gemini 3.8 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 19835,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-4-argon",
+      "resourceName": "models/gemini-4-argon",
+      "displayName": "Gemini 4 Argon",
+      "description": "Gemini 4 Argon",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 32768,
+      "status": "failed",
+      "error": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-4-argon, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-4-argon, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-4-argon, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-4-argon, description: Generate content input tokens per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h27m54.2105568s.",
+      "httpStatus": 429,
+      "responseTimeMs": 4225,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-4-carbon",
+      "resourceName": "models/gemini-4-carbon",
+      "displayName": "Gemini 4 Carbon",
+      "description": "Gemini 4 Carbon",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 32768,
+      "status": "failed",
+      "error": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-4-carbon, description: Generate content input tokens per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-4-carbon, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-4-carbon, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-4-carbon, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h27m49.657845919s.",
+      "httpStatus": 429,
+      "responseTimeMs": 4357,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-4-hydrogen",
+      "resourceName": "models/gemini-4-hydrogen",
+      "displayName": "Gemini 4 Hydrogen",
+      "description": "Gemini 4 Hydrogen",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 10798,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": true
+    },
+    {
+      "model": "gemini-flash-latest",
+      "resourceName": "models/gemini-flash-latest",
+      "displayName": "Gemini Flash Latest",
+      "description": "Latest release of Gemini Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "httpStatus": 503,
+      "responseTimeMs": 17664,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false
+    },
+    {
+      "model": "gemini-flash-lite-latest",
+      "resourceName": "models/gemini-flash-lite-latest",
+      "displayName": "Gemini Flash-Lite Latest",
+      "description": "Latest release of Gemini Flash-Lite",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "success",
+      "error": null,
+      "httpStatus": null,
+      "responseTimeMs": 7227,
+      "finishReason": "STOP",
+      "usage": {
+        "inputTokens": 219,
+        "outputTokens": 499,
+        "totalTokens": 718,
+        "thinkingTokens": null,
+        "cachedTokens": null
+      },
+      "quality": {
+        "valid": true,
+        "reason": null
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false,
+      "pricingBasis": "unavailable"
+    },
+    {
+      "model": "gemini-pro-latest",
+      "resourceName": "models/gemini-pro-latest",
+      "displayName": "Gemini Pro Latest",
+      "description": "Latest release of Gemini Pro",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "status": "failed",
+      "error": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per minute limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h26m55.071499418s.",
+      "httpStatus": 429,
+      "responseTimeMs": 4092,
+      "usage": null,
+      "quality": {
+        "valid": false,
+        "reason": "Generation request failed."
+      },
+      "estimatedCostUsd": null,
+      "pricingKnown": false
+    }
+  ]
+}

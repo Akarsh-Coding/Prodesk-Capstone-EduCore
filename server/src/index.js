@@ -36,6 +36,11 @@ if (!process.env.FRONTEND_URL) {
   console.warn('FRONTEND_URL is not set: checkout sessions cannot be created.');
 }
 
+// The AI quiz is optional: the server still starts without a key, and POST /api/ai/suggest answers 503
+if (!process.env.GEMINI_API_KEY || !process.env.GEMINI_MODEL) {
+  console.warn('GEMINI_API_KEY and/or GEMINI_MODEL is not set: POST /api/ai/suggest will return 503.');
+}
+
 const PORT = process.env.PORT || 5000;
 
 (async () => {

@@ -95,6 +95,27 @@ const progressUpdateSchema = body({ lessonId: objectId('lessonId') });
 // Validating an empty schema still strips anything a client tries to send (for example { plan: "pro" }).
 const createCheckoutSessionSchema = body({});
 
+// ------------------------------------------------------------------------------------------ AI quiz
+
+// POST /api/ai/suggest takes only a course id. Anything else in the body is stripped.
+const suggestQuizSchema = body({ courseId: objectId('courseId') });
+
+// What the LLM must return, validated on the server before anything is sent to the client:
+// exactly 5 questions, exactly 4 options each, correctIndex an integer from 0 to 3.
+// Keys the model adds on its own are stripped (z.object default), so only these fields get out.
+const generatedQuizSchema = z.object({
+  questions: z
+    .array(
+      z.object({
+        question: z.string().trim().min(1).max(500),
+        options: z.array(z.string().trim().min(1).max(300)).length(4),
+        correctIndex: z.number().int().min(0).max(3),
+        explanation: z.string().trim().min(1).max(1000),
+      })
+    )
+    .length(5),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -103,4 +124,6 @@ module.exports = {
   createEnrollmentSchema,
   progressUpdateSchema,
   createCheckoutSessionSchema,
+  suggestQuizSchema,
+  generatedQuizSchema,
 };
